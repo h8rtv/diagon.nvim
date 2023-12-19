@@ -36,7 +36,23 @@ local function index_of(table, element)
     return nil
 end
 
-local function diagon(translator, input, on_success)
+local function success(output, comment_str)
+    local above = true
+    vim.schedule(function()
+        local current_line = vim.fn.line('.')
+        if above then
+            current_line = current_line - 1
+        end
+        if comment_str ~= "" then
+            for i, line in ipairs(output) do
+                output[i] = comment_str .. line
+            end
+        end
+        vim.api.nvim_buf_set_lines(0, current_line, current_line, true, output)
+    end)
+end
+
+local function diagon(translator, input, comment_str)
     if vim.fn.executable('diagon') == 0 then
         print_error('Diagon not found in path')
         return
@@ -60,39 +76,47 @@ local function diagon(translator, input, on_success)
                 print_error(table.concat(j:stderr_result(), '\n'))
                 return
             end
-            on_success(j:result())
+            local output = j:result()
+            table.remove(j:result()) -- pop in lua
+            success(output, comment_str)
         end,
     }):sync()
 end
 
-local function success(output)
-    -- TODO: Finish this function, make it input from buffer text
-    vim.schedule(function()
-        vim.api.nvim_buf_set_lines(0, 0, 0, true, output)
-    end)
-end
-
 local function diagon_user_command(params)
-    local pos, _ = string.find(params.args, ' ')
-    if not pos then
-        print_error('No input given')
-        return
+    local translator = params.args
+    local start_pos = vim.fn.getpos("'<")
+    local end_pos = vim.fn.getpos("'>")
+
+    local min_col = math.min(start_pos[3], end_pos[3])
+
+    local lines = vim.fn.getline(start_pos[2], end_pos[2])
+
+    -- Assuming that if the selection didn't begin in the col 1, the previous
+    -- cols would contain a comment pattern
+    -- TODO: Maybe do this with treesitter if found necessary
+    local comment_str = ""
+    if min_col > 1 then
+        comment_str = string.sub(lines[1], 0, min_col - 1)
     end
 
-    local translator = string.sub(params.args, 0, pos - 1)
-    local input = string.sub(params.args, pos + 1, -1)
+    for i, line in ipairs(lines) do
+        lines[i] = string.sub(line, min_col)
+    end
 
-    print(input)
+    local input = table.concat(lines, '\n')
 
-    diagon(translator, input, success)
+    diagon(translator, input, comment_str)
 end
 
+-- TODO: add configuration options
 function M.setup()
     vim.api.nvim_create_user_command('Diagon', diagon_user_command, {
         complete = function()
             return translators
         end,
-        nargs = '+',
+        range = 2,
+        nargs = 1,
     })
 end
 
