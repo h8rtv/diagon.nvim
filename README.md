@@ -16,7 +16,7 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 ```lua
 {
   'h8rtv/diagon.nvim',
-  cmd = 'Diagon', -- Load only when calling the Diagon command
+  cmd = 'Diagon', -- Load only when the Diagon command gets called
   lazy = true,
   opts = {},
   dependencies = {
