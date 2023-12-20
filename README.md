@@ -1,5 +1,5 @@
 # diagon.nvim
-Wrapper for [Diagon](https://github.com/ArthurSonzogni/Diagon) interpreter directly inside neovim. Rewrite of the [vim-diagon](https://github.com/willchao612/vim-diagon) plugin using lua and plenary to communicate with the diagon CLI.
+Wrapper for [Diagon](https://github.com/ArthurSonzogni/Diagon) directly inside neovim. Rewrite of the [vim-diagon](https://github.com/willchao612/vim-diagon) plugin using lua and plenary to communicate with the diagon CLI.
 
 ## Prerequisites
 
@@ -34,7 +34,7 @@ You can select inside a comment block and the output will be commented too.
 
 ## Configuration
 
-These are the default configuration options. 
+These are the default configuration options. You can pass it to the `require('diagon.nvim').setup(...)` function. In lazy, you can use the `opts` property. 
 
 ```lua
 local defaults = {
