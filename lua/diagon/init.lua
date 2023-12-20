@@ -27,15 +27,6 @@ local function print_error(err_msg)
     end)
 end
 
-local function index_of(table, element)
-    for index, value in ipairs(table) do
-        if value == element then
-            return index
-        end
-    end
-    return nil
-end
-
 local function success(output, comment_str)
     local above = true
     vim.schedule(function()
@@ -63,7 +54,7 @@ local function diagon(translator, input, comment_str)
         return
     end
 
-    if not index_of(translators, translator) then
+    if not vim.tbl_contains(translators, translator) then
         print_error('Translator not found')
         return
     end
