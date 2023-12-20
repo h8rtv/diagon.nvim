@@ -100,13 +100,19 @@ local function diagon_user_command(params)
     diagon(translator, input, comment_str)
 end
 
+local function complete(partial)
+    local starts_with_partial = function(key)
+        return key:sub(1, #partial) == partial
+    end
+
+    return vim.tbl_filter(starts_with_partial, translators)
+end
+
 -- TODO: add configuration options
 function M.setup()
     vim.api.nvim_create_user_command('Diagon', diagon_user_command, {
-        complete = function()
-            return translators
-        end,
-        range = 2,
+        complete = complete,
+        range = 0,
         nargs = 1,
     })
 end
